@@ -10,6 +10,7 @@ var_cpu_rear = 0
 var_cpu_front = 0
 var_case_front = 0
 
+log_path = "/home/pi/PC_Fan_Control/log.txt"
 
 
 def set_case_rear(pwm):
@@ -57,7 +58,7 @@ def thread1():
             time_string = time.strftime("%H:%M:%S", now)
 
 
-            f = open("/home/pi/a/log.txt", "a")
+            f = open(log_path, "a")
             f.write(date_string + " " + time_string + " exception occoured\n")
             f.close()
 
@@ -137,6 +138,8 @@ def on_message(client, userdata, msg):
         set_case_front(float(msg.payload.decode("utf-8")))
 
 
+f = open(log_path, "w") # clear
+f.close()
 
 time.sleep(10) # WLAN Connection
 client = mqtt.Client()
