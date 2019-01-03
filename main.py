@@ -137,8 +137,6 @@ def on_message(client, userdata, msg):
         set_case_front(float(msg.payload.decode("utf-8")))
 
 
-f = open("/home/pi/a/log.txt", "w") # clear
-f.close()
 
 time.sleep(10) # WLAN Connection
 client = mqtt.Client()
