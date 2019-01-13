@@ -10,7 +10,7 @@ var_cpu_rear = 0
 var_cpu_front = 0
 var_case_front = 0
 
-log_path = "/home/pi/PC_Fan_Control/log.txt"
+log_path = "/home/pi/a/PC_Fan_Control/log.txt"
 
 
 def set_case_rear(pwm):
