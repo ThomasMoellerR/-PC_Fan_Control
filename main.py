@@ -4,6 +4,8 @@ import RPi.GPIO as GPIO
 from w1thermsensor import W1ThermSensor
 import paho.mqtt.client as mqtt
 import threading
+import argparse
+import os
 
 var_case_rear = 0
 var_cpu_rear = 0
@@ -37,7 +39,7 @@ def set_case_front(pwm):
 
 
 
-def thread1():
+def thread2():
     console_counter = 0
     temperature = 0
     sm = "idle"
@@ -99,12 +101,25 @@ def thread1():
 
 
 
-def thread2():
+def thread1():
+    global client
+
     while True:
+
         client.on_connect = on_connect
         client.on_message = on_message
 
-        client.connect("192.168.2.52", 1883, 60)
+        try_to_connect = True
+
+        while try_to_connect:
+            try:
+                client.connect(args.mqtt_server_ip, int(args.mqtt_server_port), 60)
+                try_to_connect = False
+                break
+            except Exception as e:
+                print(e)
+
+
 
         # Blocking call that processes network traffic, dispatches callbacks and
         # handles reconnecting.
@@ -115,15 +130,13 @@ def thread2():
 
 
 
-
-
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe("pc/fan")
+    client.subscribe(args.mqtt_topic_set_speed)
 
 
 
@@ -131,23 +144,37 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print(msg.topic + " "+ msg.payload.decode("utf-8"))
 
-    if msg.topic == "pc/fan":
+    if msg.topic == args.mqtt_topic_set_speed:
         set_case_rear(float(msg.payload.decode("utf-8")))
         set_cpu_rear(float(msg.payload.decode("utf-8")))
         set_cpu_front(float(msg.payload.decode("utf-8")))
         set_case_front(float(msg.payload.decode("utf-8")))
 
+################################################################################
+#
+# Hauptprogramm
+#
+################################################################################
+
 
 f = open(log_path, "w") # clear
 f.close()
 
-time.sleep(10) # WLAN Connection
+# Argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--mqtt_server_ip", help="")
+parser.add_argument("--mqtt_server_port", help="")
+parser.add_argument("--mqtt_topic_set_speed", help="")
+
+args = parser.parse_args()
+
 client = mqtt.Client()
 
 t1= threading.Thread(target=thread1)
 t2= threading.Thread(target=thread2)
 
 t1.start()
+time.sleep(1)
 t2.start()
 
 
