@@ -12,9 +12,6 @@ var_cpu_rear = 0
 var_cpu_front = 0
 var_case_front = 0
 
-log_path = "/home/pi/a/pc/log.txt"
-
-
 def set_case_rear(pwm):
     pwm_case_rear.ChangeDutyCycle(pwm)
     global var_case_rear
@@ -58,11 +55,6 @@ def thread2():
             now = time.localtime(time.time())
             date_string = time.strftime("%Y-%m-%d", now)
             time_string = time.strftime("%H:%M:%S", now)
-
-
-            f = open(log_path, "a")
-            f.write(date_string + " " + time_string + " exception occoured\n")
-            f.close()
 
 
         if temperature == 0: # im Fehlerfall
@@ -156,9 +148,6 @@ def on_message(client, userdata, msg):
 #
 ################################################################################
 
-
-f = open(log_path, "w") # clear
-f.close()
 
 # Argparse
 parser = argparse.ArgumentParser()
